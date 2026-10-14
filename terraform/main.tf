@@ -1,5 +1,9 @@
 data "aws_availability_zones" "available" {}
 
+# =====================================
+# VPC CONFIGURATION
+# =====================================
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 6.0"
@@ -7,44 +11,92 @@ module "vpc" {
   name = "ecommerce-vpc"
   cidr = "10.30.0.0/16"
 
-  azs             = slice(data.aws_availability_zones.available.names, 0, 2)
-  private_subnets = ["10.30.1.0/24", "10.30.2.0/24"]
-  public_subnets  = ["10.30.101.0/24", "10.30.102.0/24"]
+  azs = slice(
+    data.aws_availability_zones.available.names,
+    0,
+    2
+  )
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
+  private_subnets = [
+    "10.30.1.0/24",
+    "10.30.2.0/24"
+  ]
+
+  public_subnets = [
+    "10.30.101.0/24",
+    "10.30.102.0/24"
+  ]
+
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
   enable_dns_hostnames = true
 
-  public_subnet_tags = {"kubernetes.io/role/elb" = 1}
-  private_subnet_tags = {"kubernetes.io/role/internal-elb" = 1}
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = 1
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = 1
+  }
 }
+
+# =====================================
+# EKS CLUSTER CONFIGURATION
+# =====================================
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
 
-  name = var.cluster_name
+  name               = var.cluster_name
   kubernetes_version = "1.33"
+
   endpoint_public_access = true
+
+  # ===================================
+  # EKS ADD-ONS
+  # ===================================
 
   addons = {
     coredns = {}
-    kube-proxy = {}
-    vpc-cni = {}
-    eks-pod-identity-agent = {}
-    aws-ebs-csi-driver = {}
-  }
 
-  vpc_id = module.vpc.vpc_id
+    kube-proxy = {}
+
+    vpc-cni = {
+      before_compute = true
+    }
+
+    eks-pod-identity-agent = {}
+
+    aws-ebs-csi-driver = {
+     pod_identity_association = [{
+      role_arn        = aws_iam_role.ebs_csi.arn
+      service_account = "ebs-csi-controller-sa"
+     }]
+    }
+
+  # ===================================
+  # VPC CONNECTION
+  # ===================================
+
+  vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
+
   enable_cluster_creator_admin_permissions = true
+
+  # ===================================
+  # EKS WORKER NODES
+  # ===================================
 
   eks_managed_node_groups = {
     main = {
       instance_types = ["c7i-flex.large"]
-      min_size = 1
+
+      min_size     = 1
       desired_size = 1
-      max_size = 2
+      max_size     = 2
+
+      capacity_type = "ON_DEMAND"
     }
   }
 }
