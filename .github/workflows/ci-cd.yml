@@ -11,11 +11,10 @@ on:
 
 permissions:
   contents: write
+
 concurrency:
   group: ecommerce-${{ github.ref }}
   cancel-in-progress: true
-
-
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
@@ -25,23 +24,30 @@ jobs:
   test:
     runs-on: [self-hosted, linux, x64, ecommerce-runner]
     strategy:
+      fail-fast: false
       matrix:
         service: [user-service, product-service, order-service]
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Test ${{ matrix.service }}
         working-directory: services/${{ matrix.service }}
         run: |
           python3 -m venv .venv
           . .venv/bin/activate
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pytest -q
 
   frontend-build:
     runs-on: [self-hosted, linux, x64, ecommerce-runner]
+
     steps:
       - uses: actions/checkout@v4
-      - working-directory: frontend
+
+      - name: Build frontend
+        working-directory: frontend
         run: |
           npm install
           npm run build
@@ -49,10 +55,14 @@ jobs:
   sonar:
     runs-on: [self-hosted, linux, x64, ecommerce-runner]
     needs: [test, frontend-build]
+
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
-      - uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube analysis
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
@@ -60,68 +70,144 @@ jobs:
   build-push:
     runs-on: [self-hosted, linux, x64, ecommerce-runner]
     needs: sonar
+
     strategy:
       fail-fast: false
       matrix:
-        component: [frontend, api-gateway, user-service, product-service, order-service]
+        component:
+          - frontend
+          - api-gateway
+          - user-service
+          - product-service
+          - order-service
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials
+        if: github.event_name != 'pull_request'
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        if: github.event_name != 'pull_request'
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Resolve context
+      - name: Resolve build context
         id: ctx
+        shell: bash
         run: |
           case "${{ matrix.component }}" in
-            frontend|api-gateway) DIR="${{ matrix.component }}" ;;
-            *) DIR="services/${{ matrix.component }}" ;;
+            frontend|api-gateway)
+              DIR="${{ matrix.component }}"
+              ;;
+            user-service|product-service|order-service)
+              DIR="services/${{ matrix.component }}"
+              ;;
+            *)
+              echo "Unknown component"
+              exit 1
+              ;;
           esac
+
+          test -f "$DIR/Dockerfile" || {
+            echo "Dockerfile not found in $DIR"
+            exit 1
+          }
+
           echo "dir=$DIR" >> "$GITHUB_OUTPUT"
 
-      - name: Build
+      - name: Build Docker image
+        id: build
+        shell: bash
         run: |
           TAG="${GITHUB_SHA::12}"
           IMAGE="${ECR_REGISTRY}/ecommerce/${{ matrix.component }}:${TAG}"
+
           docker build -t "$IMAGE" "${{ steps.ctx.outputs.dir }}"
-          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
-      - name: Trivy
-        run: trivy image --exit-code 0 --severity HIGH,CRITICAL --ignore-unfixed "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
-      - name: Push
+      - name: Scan image with Trivy
+        run: |
+          trivy image \
+            --exit-code 0 \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            "${{ steps.build.outputs.image }}"
+
+      - name: Push image to ECR
         if: github.event_name != 'pull_request'
-        run: docker push "$IMAGE"
+        run: |
+          docker push "${{ steps.build.outputs.image }}"
 
   gitops-update:
     runs-on: [self-hosted, linux, x64, ecommerce-runner]
     needs: build-push
     if: github.event_name != 'pull_request'
+
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
           token: ${{ secrets.GITOPS_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Update Kubernetes manifest image tags
+      - name: Update Kubernetes image tags
+        shell: bash
         run: |
+          set -euo pipefail
           TAG="${GITHUB_SHA::12}"
-          sed -i "s#image: .*/ecommerce/frontend:.*#image: ${ECR_REGISTRY}/ecommerce/frontend:${TAG}#" k8s/09-frontend.yaml
-          sed -i "s#image: .*/ecommerce/api-gateway:.*#image: ${ECR_REGISTRY}/ecommerce/api-gateway:${TAG}#" k8s/08-api-gateway.yaml
-          sed -i "s#image: .*/ecommerce/user-service:.*#image: ${ECR_REGISTRY}/ecommerce/user-service:${TAG}#" k8s/05-user-service.yaml
-          sed -i "s#image: .*/ecommerce/product-service:.*#image: ${ECR_REGISTRY}/ecommerce/product-service:${TAG}#" k8s/06-product-service.yaml
-          sed -i "s#image: .*/ecommerce/order-service:.*#image: ${ECR_REGISTRY}/ecommerce/order-service:${TAG}#" k8s/07-order-service.yaml
+
+          update_image() {
+            FILE="$1"
+            IMAGE="$2"
+
+            test -f "$FILE" || {
+              echo "Manifest not found: $FILE"
+              exit 1
+            }
+
+            sed -i -E \
+              "s#^([[:space:]]*image:[[:space:]]*).*/ecommerce/[^[:space:]]+#\1${IMAGE}#" \
+              "$FILE"
+
+            grep -F "image: ${IMAGE}" "$FILE" >/dev/null || {
+              echo "Image update verification failed: $FILE"
+              exit 1
+            }
+          }
+
+          update_image k8s/09-frontend.yaml \
+            "${ECR_REGISTRY}/ecommerce/frontend:${TAG}"
+
+          update_image k8s/08-api-gateway.yaml \
+            "${ECR_REGISTRY}/ecommerce/api-gateway:${TAG}"
+
+          update_image k8s/05-user-service.yaml \
+            "${ECR_REGISTRY}/ecommerce/user-service:${TAG}"
+
+          update_image k8s/06-product-service.yaml \
+            "${ECR_REGISTRY}/ecommerce/product-service:${TAG}"
+
+          update_image k8s/07-order-service.yaml \
+            "${ECR_REGISTRY}/ecommerce/order-service:${TAG}"
 
       - name: Commit Kubernetes GitOps changes
+        shell: bash
         run: |
           git config user.name "ecommerce-ci[bot]"
           git config user.email "ecommerce-ci@local"
+
           git add k8s/
-          git diff --cached --quiet && exit 0
+
+          if git diff --cached --quiet; then
+            echo "No Kubernetes manifest changes."
+            exit 0
+          fi
+
           git commit -m "ci: update Kubernetes images ${GITHUB_SHA::12}"
           git push origin main
+
