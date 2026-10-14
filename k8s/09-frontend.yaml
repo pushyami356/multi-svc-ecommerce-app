@@ -39,7 +39,11 @@ spec:
     spec:
       containers:
         - name: frontend
+<<<<<<< HEAD
           image: 836003244254.dkr.ecr.eu-north-1.amazonaws.com/ecommerce/frontend:93325ec12b72
+=======
+          image: 836003244254.dkr.ecr.eu-north-1.amazonaws.com/ecommerce/frontend:6f824de4f96f
+>>>>>>> ebc7262 (Fix ECR registry account in Kubernetes manifests)
           imagePullPolicy: Always
           ports:
             - containerPort: 80
