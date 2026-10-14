@@ -1,3 +1,7 @@
+# =====================================
+# AVAILABILITY ZONES
+# =====================================
+
 data "aws_availability_zones" "available" {}
 
 # =====================================
@@ -69,11 +73,12 @@ module "eks" {
     eks-pod-identity-agent = {}
 
     aws-ebs-csi-driver = {
-     pod_identity_association = [{
-      role_arn        = aws_iam_role.ebs_csi.arn
-      service_account = "ebs-csi-controller-sa"
-     }]
+      pod_identity_association = [{
+        role_arn        = aws_iam_role.ebs_csi.arn
+        service_account = "ebs-csi-controller-sa"
+      }]
     }
+  }
 
   # ===================================
   # VPC CONNECTION
