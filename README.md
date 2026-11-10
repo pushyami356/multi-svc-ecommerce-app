@@ -975,11 +975,11 @@ terraform output ecr_urls
 output will be
 ```bash
 {
-  "ecommerce/api-gateway" = "263860684319.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/api-gateway"
-  "ecommerce/frontend" = "263860684319.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/frontend"
-  "ecommerce/order-service" = "263860684319.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/order-service"
-  "ecommerce/product-service" = "263860684319.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/product-service"
-  "ecommerce/user-service" = "263860684319.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/user-service"
+  "ecommerce/api-gateway" = "439187708175.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/api-gateway"
+  "ecommerce/frontend" = "439187708175.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/frontend"
+  "ecommerce/order-service" = "439187708175.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/order-service"
+  "ecommerce/product-service" = "439187708175.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/product-service"
+  "ecommerce/user-service" = "439187708175.dkr.ecr.ap-southeast-2.amazonaws.com/ecommerce/user-service"
 }
 ```
 ```bash
