@@ -341,7 +341,7 @@ Press Ctrl + C after the hostname appears.
 4. Apply your Ingress resource
 Therefore, use:
 ```bash
-kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/11-ecommerce-ingress.yaml
 ```
 Verify:
 ```bash
