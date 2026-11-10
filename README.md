@@ -686,67 +686,11 @@ git pull origin main
 git status
 ```
 
-
-# Create a new feature branch changes
-```bash
-
-git checkout -b feature
-
-
-git branch --show-current   or git branch
-
-git status
-```
-
-git add  terraform/terraform.tfvars
-
-git commit -m "Update terraform.tfvars file admin cidr with ec2"
-```bash
-git config --global user.email  pushyami.illapani@gmail.com
-
-git config --global user.name pushyami356
-
-git push -u origin feature
-```
-
-enter
-
 Username for 'https://github.com': pushyami356
 
 Password for 'https://pushyami.illapani@gmail.com': Paste your saved github token here
 
 git status
-
-### Create a Pull Request
-
-Open your GitHub repository.
-
-Select Compare & pull request.
-
-Base branch: main.
-
-Compare branch: feature.
-
-Click Create pull request.
-
-Review and merge the pull request into main.
-
-open gitbash terminal
-
-After merging, update your local main branch:
-bash
-```bash
-
-git checkout main
-
-git pull origin main
-```
-
-
-git add terraform/main.tf terraform/ecr.tf terraform/outputs.tf
-git commit -m "changed tf files"
-```
-provide git username
 
 ```bash
 git password: <paste github token >
@@ -804,26 +748,6 @@ after all resources created check
 
 ## Step 23 - Verify all resources 
 
-vim ecommerce-ingress.yaml
-```bash
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ecommerce-ingress
-  namespace: ecommerce
-spec:
-  ingressClassName: nginx
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 80
-```
 Check NGINX Ingress installation
 ```bash
 kubectl get pods -n ingress-nginx
@@ -834,15 +758,6 @@ kubectl get ingressclass
 
 kubectl get ingress -n ecommerce
 ```
-
-modify in frontend.yaml
-
-```bash
-spec:
-  type: ClusterIP
-```
-change service
-loadbalancer to clusterIp
 
 ```bash
 helm list -n monitoring
@@ -943,6 +858,11 @@ aws eks update-kubeconfig \
   --region ap-southeast-2 \
   --name ecommerce-cluster
 ```
+Check Kubernetes connectivity
+
+```bash
+kubectl config current-context
+```
 Check the worker nodes:
 
 ```bash
@@ -1037,7 +957,7 @@ Repository variables, configure
 | Variable | Value |
 | --- | --- |
 | AWS_REGION | ap-southeast-2 |
-| ECR_REGISTRY | 263860684319.dkr.ecr.ap-southeast-2.amazonaws.com |
+| ECR_REGISTRY | 439187708175.dkr.ecr.ap-southeast-2.amazonaws.com |
 | SONAR_HOST_URL | http://localhost:9000 |
 
 	
