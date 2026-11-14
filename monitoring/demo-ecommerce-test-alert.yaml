@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ecommerce-test-alert
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: ecommerce.test.rules
+      rules:
+        - alert: EcommerceDemoTestAlert
+          expr: vector(1)
+          for: 30s
+          labels:
+            severity: warning
+            application: ecommerce
+          annotations:
+            summary: "Ecommerce Alertmanager test"
+            description: "This is a temporary test alert."
