@@ -4,7 +4,7 @@ metadata:
   name: ecommerce-test-alert
   namespace: monitoring
   labels:
-    release: monitoring
+    release: kube-prometheus-stack
 spec:
   groups:
     - name: ecommerce.test.rules

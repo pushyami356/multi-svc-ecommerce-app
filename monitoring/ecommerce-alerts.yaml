@@ -7,13 +7,17 @@ metadata:
     release: kube-prometheus-stack
 spec:
   groups:
-    - name: ecommerce.rules
+    - name: ecommerce-pod-alerts
       rules:
         - alert: EcommercePodNotReady
-          expr: kube_pod_status_ready{namespace="ecommerce",condition="true"} == 0
-          for: 5m
+          expr: |
+            kube_pod_status_ready{
+              condition="false",
+              namespace="ecommerce"
+            } == 1
+          for: 30s
           labels:
             severity: warning
           annotations:
-            summary: "E-Commerce pod is not ready"
-            description: "A pod in namespace ecommerce has remained unready for 5 minutes."
+            summary: E-Commerce pod is not ready
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not ready."
