@@ -3,7 +3,7 @@
 
 # E-Commerce Application Traffic Generator
 
-BASE_URL="http://ae91cf5b4fc764f8c8f5fbec0d906475-1158820016.ap-southeast-2.elb.amazonaws.com "
+BASE_URL="http://a49a6b1baa5844771bdd0c7b080d6913-781786642.ap-southeast-2.elb.amazonaws.com "
 
 echo "Starting E-Commerce traffic generation..."
 
