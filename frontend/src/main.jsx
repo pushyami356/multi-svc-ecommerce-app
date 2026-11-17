@@ -189,7 +189,7 @@ function App() {
           ) : (
             <div className="grid">
               {orders.map((order, index) => (
-                <article className="product" key={index}>
+                <article className="product" key={order.id}>
                   <h3>Order #{order.id}</h3>
                   <p>{order.name}</p>
                   <strong>Order Placed</strong>
