@@ -2407,6 +2407,9 @@ Finally, I documented the infrastructure cleanup process to avoid unnecessary AW
 
 Slides and images for presentation purpose
 
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/ceb6355b-9525-494a-981d-2e299f9a7a39" />
+
+
 
  <img width="1536" height="712" alt="WhatsApp Image 2026-11-11 at 3 11 30 PM" src="https://github.com/user-attachments/assets/aa325de2-ee2b-43bf-80b5-83b971a8ec6c" />
 
