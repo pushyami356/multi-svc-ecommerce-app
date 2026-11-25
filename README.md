@@ -2404,3 +2404,35 @@ For observability, I implemented Prometheus for metrics collection, Grafana for 
 centralized Kubernetes application logging, allowing service logs to be queried through Grafana.
 
 Finally, I documented the infrastructure cleanup process to avoid unnecessary AWS resource costs after completing the demonstration.
+
+Slides and images for presentation purpose
+
+
+ <img width="1536" height="712" alt="WhatsApp Image 2026-11-11 at 3 11 30 PM" src="https://github.com/user-attachments/assets/aa325de2-ee2b-43bf-80b5-83b971a8ec6c" />
+
+
+<img width="1672" height="941" alt="E-commerce DevOps Repository Workflow Infographic" src="https://github.com/user-attachments/assets/db1fe419-79a9-4163-8a88-f3b0e4bb210b" />
+
+<img width="1670" height="942" alt="End-to-End DevSecOps on AWS EKS" src="https://github.com/user-attachments/assets/03837ca2-bb14-4aea-aa65-c32ffec762a2" />
+
+
+<img width="1672" height="941" alt="Self-Hosted GitHub Actions Runner Workflow" src="https://github.com/user-attachments/assets/9b80b8a1-b520-4437-ab7e-4b5df2a0a275" />
+
+
+<img width="1672" height="941" alt="SonarQube DevSecOps Quality Pipeline" src="https://github.com/user-attachments/assets/c45490d9-0719-443a-acc9-fa097ed59f1c" />
+
+ <img width="1080" height="720" alt="WhatsApp Image 2026-11-12 at 8 18 00 PM" src="https://github.com/user-attachments/assets/e65193e7-2897-4ed6-b373-16ab4217afa2" />
+
+ <img width="1752" height="897" alt="AWS Terraform E-Commerce Architecture" src="https://github.com/user-attachments/assets/99e88f73-a1d8-4df0-b245-41730e6e7945" />
+
+
+<img width="1536" height="1024" alt="E-Commerce DevSecOps Architecture on AWS" src="https://github.com/user-attachments/assets/f4dc5197-f8c7-4505-adb7-2b70b18dbd6a" />
+
+<img width="1600" height="893" alt="WhatsApp Image 2026-11-11 at 5 06 05 PM" src="https://github.com/user-attachments/assets/ab3fb789-ddfd-4078-b35c-4492fe7b4460" />
+
+<img width="1600" height="900" alt="WhatsApp Image 2026-11-12 at 8 29 06 PM" src="https://github.com/user-attachments/assets/a8632b0e-ac1e-44fe-8a8f-7aa6c7159268" />
+
+
+
+
+
