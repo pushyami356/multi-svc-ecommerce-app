@@ -2432,6 +2432,8 @@ Slides and images for presentation purpose
 
 <img width="1600" height="900" alt="WhatsApp Image 2026-11-12 at 8 29 06 PM" src="https://github.com/user-attachments/assets/a8632b0e-ac1e-44fe-8a8f-7aa6c7159268" />
 
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/587a044f-0c6b-470f-8edf-8f08801263fa" />
+
 
 
 
